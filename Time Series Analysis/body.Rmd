@@ -15,7 +15,7 @@ layout: post
 
 <head>
 
-<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/Time Series Analysis/css/fancybox.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/fancybox.css" />
 <style type="text/css">
   a.fancybox img {
     border: none;
