@@ -68,13 +68,14 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 <li><a href="#sample-statistics">Sample Statistics</a></li>
 <li><a href="#initial-stationarity-assessment">Initial Stationarity Assessment</a></li>
 <li><a href="#differencing">Differencing</a></li>
+<li><a href="#arima">ARIMA</a></li>
 </ul></li>
 </ul></li>
 </ul>
 </div>
 
 <head>
-<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/fancybox.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.fancybox-1.3.4.css" />
 <style type="text/css">
   a.fancybox img {
     border: none;
@@ -89,14 +90,7 @@ a.fancybox:hover img {
 <script src="https://cdn.rawgit.com/Kevin-M-Smith/scianimator/master/assets/js/jquery.scianimator.min.js"></script>
 </head>
 <style>
-#TOC {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: 100%;
-  overflow:auto;
-}
+
 body {
   max-width: 800px;
   margin: auto;
@@ -105,12 +99,18 @@ body {
 }
 p { line-height: 1.5; }
 
-
-
-
+.fancybox-title-inside {
+  margin-left: 0px !important;
+}
 </style>
+<link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.tocify.css" /> <link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/bootstrap.css" />
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.tocify.min.js"></script>
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery-ui.min.js"
+
+
+
 <body>
-<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/fancybox/1.3.4/jquery.fancybox-1.3.4.pack.min.js"></script>
+  <script type="text/javascript" src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.fancybox-1.3.4.pack.min.js"></script>
 <script type="text/javascript">
   $(function($){
     var addToAll = true;
@@ -129,9 +129,19 @@ p { line-height: 1.5; }
       titlePosition: titlePosition
     });
   });
+  
 $.noConflict();
+
+ $(function() {
+                  //Calls the tocify method on your HTML div.
+                  $("#TOC").tocify();
+              });
+              
 </script>
 </body>
+<button type="button" onclick="toggle_R();" style="position: absolute; top: 0; right: 0;">
+Hide/Show Source
+</button>
 <hr>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
@@ -290,13 +300,44 @@ Figure 4: Total and partial correlograms.
 </div>
 <div id="differencing" class="section level3">
 <h3>Differencing</h3>
-<p><img src="body_files/figure-html/unnamed-chunk-1-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /><img src="body_files/figure-html/unnamed-chunk-1-2.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /></p>
-<p><img src="body_files/figure-html/unnamed-chunk-2-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /></p>
-<style>
-.fancybox-title-inside {
-  margin-left: 0px;
+<img src="body_files/figure-html/unnamed-chunk-1-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /><b>
+<p class="caption" align="center">
+Figure 5: Differenced (d=12) Monthly Mean Flow Series
+</p>
+<p></b></p>
+<img src="body_files/figure-html/unnamed-chunk-2-1.png" title="Total and partial correlograms for the differenced (d=12) series." alt="Total and partial correlograms for the differenced (d=12) series." width="960" /><b>
+<p class="caption" align="center">
+Figure 6: Total and partial correlograms for the differenced (d=12) series.
+</p>
+<p></b></p>
+</div>
+<div id="arima" class="section level3">
+<h3>ARIMA</h3>
+<pre class="r"><code>AIC =  matrix(ncol = 5, nrow = 5)
+colnames(AIC) = paste(&#39;&#39;, 0:4, sep=&#39;&#39;)
+rownames(AIC) = paste(&#39;&#39;, 0:4, sep=&#39;&#39;)
+
+for(p in 0:4){
+  for(q in 0:4){
+    tryCatch({
+      a &lt;- arima(tsd$value, order=c(p, 0, q))
+      if(exists(&quot;a&quot;)) AIC[q + 1, p + 1] &lt;- floor(a$aic)
+    }, error = function(cond){})
+  }
 }
-</style>
+
+levelplot(t(AIC), panel=function(...) {
+  arg &lt;- list(...)
+  panel.levelplot(...)
+  panel.text(arg$x, arg$y, round(arg$z,1))},
+  col.regions=colorRampPalette(brewer.pal(9,&quot;Greys&quot;)[3:7])(25),
+  xlab = &quot;p&quot;,
+  ylab = list(&quot;q&quot;, rot=0),
+  main = &quot;AIC&quot;)</code></pre>
+<p><img src="body_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="672" /></p>
+<pre class="r"><code>print(1:10)</code></pre>
+<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
+<p><img src="body_files/figure-html/unnamed-chunk-4-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /></p>
 </div>
 </div>
 </div>

@@ -26,3 +26,5 @@ devtools
 forecast
 colorRamps
 RColorBrewer
+knitrBootstrap
+rmarkdown

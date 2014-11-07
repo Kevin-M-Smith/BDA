@@ -34,14 +34,7 @@ a.fancybox:hover img {
 <script src="https://cdn.rawgit.com/Kevin-M-Smith/scianimator/master/assets/js/jquery.scianimator.min.js"></script>
 </head>
 <style>
-#TOC {
-  position: fixed;
-  left: 0;
-  top: 0;
-  width: 200px;
-  height: 100%;
-  overflow:auto;
-}
+
 body {
   max-width: 800px;
   margin: auto;
@@ -55,10 +48,10 @@ p { line-height: 1.5; }
 }
 </style>
 
-<link type="text/css" rel="stylesheet" href="../css/jquery.tocify.css" />
-<link type="text/css" rel="stylesheet" href="../css/bootstrap.css" />
-<script src="../js/jquery.tocify.min.js"></script>
-<script src="../js/jquery-ui.min.js"
+<link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.tocify.css" />
+<link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/bootstrap.css" />
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.tocify.min.js"></script>
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery-ui.min.js"
 
 
 
@@ -84,8 +77,13 @@ p { line-height: 1.5; }
   });
   
 $.noConflict();
-</script>
 
+ $(function() {
+                  //Calls the tocify method on your HTML div.
+                  $("#TOC").tocify();
+              });
+              
+</script>
 </body>
 
 
