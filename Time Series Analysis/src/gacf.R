@@ -70,6 +70,7 @@ ggpacf <- function(x){
 ggacf.th <- function(x, fit){
   
   coefs = coef(fit)
+  print(coefs)
   ar = grep("ar", names(coefs))
   ma = grep("ma", names(coefs))
   theory <- ARMAacf(ar = coefs[ar], ma = coefs[ma], lag.max=120)
@@ -117,11 +118,11 @@ ggpacf.th <- function(x, fit){
   q = q + xlim(c(0,120))
   q = q + geom_hline(aes(yintercept = 0))
   q = q + geom_segment(data = gacf.df, mapping = aes(xend = lag), yend = 0, lwd=1)
-   q = q + theme_bw()
-   q = q + geom_hline(aes(yintercept = c(sig,-1*sig)), linetype=2)
-   q = q + ylab(expression(rho[k]))
+  q = q + theme_bw()
+  q = q + geom_hline(aes(yintercept = c(sig,-1*sig)), linetype=2)
+  q = q + ylab(expression(rho[k]))
    
-   q = q + geom_segment(data = gacf.th, mapping = aes(y = 0, yend = acf, 
+  q = q + geom_segment(data = gacf.th, mapping = aes(y = 0, yend = acf, 
                                       x = lag + 0.2, 
                                       xend = lag + 0.2), lwd = 1, color="red")
   

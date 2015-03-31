@@ -8,14 +8,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 
-<meta name="author" content="Kevin Smith | Big Data Analytics | October 27th, 2014" />
 
 
 <title>Time Series Analysis</title>
 
 <script src="body_files/jquery-1.11.0/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link href="body_files/bootstrap-2.3.2/css/bootstrap.min.css" rel="stylesheet" />
+<link href="body_files/bootstrap-2.3.2/css/spacelab.min.css" rel="stylesheet" />
 <link href="body_files/bootstrap-2.3.2/css/bootstrap-responsive.min.css" rel="stylesheet" />
 <script src="body_files/bootstrap-2.3.2/js/bootstrap.min.js"></script>
 
@@ -55,27 +54,19 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 
 <div id="header">
 <h1 class="title">Time Series Analysis</h1>
-<h4 class="author"><em>Kevin Smith | Big Data Analytics | October 27th, 2014</em></h4>
 </div>
 
-<div id="TOC">
-<ul>
-<li><a href="#overview">Overview</a></li>
-<li><a href="#the-ganges">The Ganges</a><ul>
-<li><a href="#monthly-flow">Monthly Flow</a><ul>
-<li><a href="#time-series">Time Series</a></li>
-<li><a href="#boxplots">Boxplots</a></li>
-<li><a href="#sample-statistics">Sample Statistics</a></li>
-<li><a href="#initial-stationarity-assessment">Initial Stationarity Assessment</a></li>
-<li><a href="#differencing">Differencing</a></li>
-<li><a href="#arima">ARIMA</a></li>
-</ul></li>
-</ul></li>
-</ul>
-</div>
 
+<script type="text/javascript" src="js/jquery.min.js"></script>
+<script type="text/javascript" src="js/jquery-ui.min.js"></script>
+<script type="text/javascript" src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.fancybox-1.3.4.pack.min.js"></script>
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.tocify.js"></script>
+<p><link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.tocify.css" /> <link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.fancybox-1.3.4.css" /></p>
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/scianimator/master/assets/js/jquery.scianimator.min.js"></script>
 <head>
-<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.fancybox-1.3.4.css" />
+<div id="TOC" class="TOC">
+
+</div>
 <style type="text/css">
   a.fancybox img {
     border: none;
@@ -84,32 +75,45 @@ if (window.hljs && document.readyState && document.readyState === "complete") {
 a.fancybox:hover img {
   position: relative; z-index: 999; -o-transform: scale(1.03,1.03); -ms-transform: scale(1.03,1.03); -moz-transform: scale(1.03,1.03); -webkit-transform: scale(1.03,1.03); transform: scale(1.03,1.03);
 }
-</style>
-<link rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/202-P2/master/css/style.css"> <link rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/scianimator/master/assets/css/scianimator.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
-<script src="https://cdn.rawgit.com/Kevin-M-Smith/scianimator/master/assets/js/jquery.scianimator.min.js"></script>
-<p><link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.tocify.css" /></p>
-</head>
-<style>
+
+#TOC {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  overflow:auto;
+}
+
+#source{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  overflow:auto;
+}
 
 body {
-  max-width: 800px;
+  float: left; 
   margin: auto;
-  margin-left:210px;
+  margin-left:300px;
   line-height: 20px;
 }
+
 p { line-height: 1.5; }
 
 .fancybox-title-inside {
   margin-left: 0px !important;
 }
+
+
 </style>
+</head>
 <body>
-<script type="text/javascript" src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.fancybox-1.3.4.pack.min.js"></script>
-<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.tocify.js"></script>
 <script type="text/javascript">
+  
+  
   $(function($){
+    $("#TOC").tocify({extendPage: true, selectors: "h1,h2,h3,h4"});
     var addToAll = true;
     var gallery = false;
     var titlePosition = 'inside';
@@ -129,15 +133,25 @@ p { line-height: 1.5; }
   
 $.noConflict();
 
-jQuery(document).ready(function(){
-  $("#TOC").tocify();
-})
-          
+  
+</script>
+<script>
+function toggle_R(){
+$("pre").slideToggle(1);
+setTimeout(function(){
+$("div[data-unique*=" + $(".active")[0].getAttribute("data-unique") + "]")[0].scrollIntoView();
+}, 100);
+
+}
 </script>
 </body>
-<button type="button" onclick="toggle_R();" style="position: absolute; top: 0; right: 0;">
-Hide/Show Source
-</button>
+<div id="source" class="tocify">
+<ul class="tocify-header nav nav-list">
+<li class="tocify-item active" style="cursor: pointer;">
+<a onclick='toggle_R();' >Show / Hide Source</a>
+</li>
+</ul>
+</div>
 <hr>
 <div id="overview" class="section level1">
 <h1>Overview</h1>
@@ -150,7 +164,28 @@ This project explores basic time series analysis techniques for two datasets. Th
 <h2>Monthly Flow</h2>
 <div id="time-series" class="section level3">
 <h3>Time Series</h3>
-A plot of the monthly time series reveals seasonality in the data. This structure will need to be removed before we can assess the stationarity of the time series. <img src="body_files/figure-html/fig1-1.png" title="79 years of mean monthly flow data for the Ganges in real space (top) and log space (bottom)." alt="79 years of mean monthly flow data for the Ganges in real space (top) and log space (bottom)." width="960" style="display: block; margin: auto;" /><b>
+<p>A plot of the monthly time series reveals seasonality in the data. This structure will need to be removed before we can assess the stationarity of the time series.</p>
+<pre class="r"><code>p1 = ggplot(dfg, aes(y=Flow, x=idx)) + geom_line() + theme_bw() 
+p1 = p1 + ggtitle(&quot;Monthly Mean Flows for Ganges [ 1934 - 2012 ]&quot;)
+p1 = p1 + xlab(&quot;&quot;) + ylab(&quot;Flow (CFS)&quot;)
+p1 = p1 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+
+
+p11 = ggplot(dfg, aes(y=log(Flow), x=idx)) + geom_line() + theme_bw()
+p11 = p11 + xlab(&quot;Index&quot;) + ylab(&quot;Log Flow&quot;)
+p11 = p11 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+
+#p11 = p11 + geom_smooth(method = &quot;loess&quot;, size = 1.5)
+p11 = p11 + theme(plot.margin=unit(c(0,4,10,7),&quot;mm&quot;))
+
+grid.arrange(p1, p11, nrow=2)</code></pre>
+<img src="body_files/figure-html/fig1-1.png" title="79 years of mean monthly flow data for the Ganges in real space (top) and log space (bottom)." alt="79 years of mean monthly flow data for the Ganges in real space (top) and log space (bottom)." style="display: block; margin: auto;" /><b>
 <p class="caption" align="center">
 Figure 1: 79 years of mean monthly flow data for the Ganges in real space (top) and log space (bottom).
 </p>
@@ -158,7 +193,23 @@ Figure 1: 79 years of mean monthly flow data for the Ganges in real space (top) 
 </div>
 <div id="boxplots" class="section level3">
 <h3>Boxplots</h3>
-Within-year seasonality is highlighted in this boxplot of monthly mean flows. During the year there seems to be ‘wet’ and ‘dry’ seasons of differing lengths. These seasons will be independently analyzed in sections 3 and 4. <img src="body_files/figure-html/fig2-1.png" title="A series of boxplots showing the center and spread of the dataset by month. The signal appears highly seasonal." alt="A series of boxplots showing the center and spread of the dataset by month. The signal appears highly seasonal." width="960" style="display: block; margin: auto;" /><b>
+<p>Within-year seasonality is highlighted in this boxplot of monthly mean flows. During the year there seems to be ‘wet’ and ‘dry’ seasons of differing lengths. These seasons will be independently analyzed in sections 3 and 4.</p>
+<pre class="r"><code>p2 = ggplot(dfg, aes(y=Flow, x=MID)) + geom_boxplot() + theme_bw()
+
+p2 = p2 + ggtitle(paste(&quot;Boxplot of Monthly Mean Flows for Ganges [&quot;,
+                   min(dfg$Year), 
+                   &quot;-&quot;,
+                   max(dfg$Year),
+                   &quot;]&quot;))
+
+p2 = p2 + xlab(&quot;Month&quot;) + ylab(&quot;Flow (CFS)&quot;)
+p2 = p2 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+
+p2</code></pre>
+<img src="body_files/figure-html/fig2-1.png" title="A series of boxplots showing the center and spread of the dataset by month. The signal appears highly seasonal." alt="A series of boxplots showing the center and spread of the dataset by month. The signal appears highly seasonal." style="display: block; margin: auto;" /><b>
 <p class="caption" align="center">
 Figure 2: A series of boxplots showing the center and spread of the dataset by month. The signal appears highly seasonal.
 </p>
@@ -166,6 +217,7 @@ Figure 2: A series of boxplots showing the center and spread of the dataset by m
 </div>
 <div id="sample-statistics" class="section level3">
 <h3>Sample Statistics</h3>
+<pre class="r"><code>pander(tab1, style = &#39;rmarkdown&#39;, justify=&#39;center&#39;)</code></pre>
 <table>
 <thead>
 <tr class="header">
@@ -258,9 +310,21 @@ Figure 2: A series of boxplots showing the center and spread of the dataset by m
 </table>
 <p><br></p>
 </div>
-<div id="initial-stationarity-assessment" class="section level3">
-<h3>Initial Stationarity Assessment</h3>
-<p>The monthly time series is not even first-order stationary becuase the mean exhibits strong seasonality. However, the highly seasonal structure suggests that we may be able to make the time series stationary though differencing.</p>
+<div id="stationarity-assessment" class="section level3">
+<h3>Stationarity Assessment</h3>
+<p>The monthly time series is not even first-order stationary becuase the mean exhibits strong seasonality. However, the highly seasonal structure suggests that we may be able to make the time series stationary though differencing. The correlation at lag 12 is particularly strong, so let us begin there.</p>
+<pre class="r"><code>for(i in 1:12){
+dfg.lag12 = rep(NA, length(dfg$Flow))
+dfg.lag12[1:12==(i)] = dfg$Flow[1:12==(i)]
+p1 = ggplot(dfg, aes(y=Flow, x=idx)) + geom_line() + theme_bw() + geom_point(aes(y=dfg.lag12))
+p1 = p1 + ggtitle(&quot;Monthly Mean Flows for Ganges [ 1934 - 2012 ]&quot;)
+p1 = p1 + xlab(&quot;Index&quot;) + ylab(&quot;Flow (CFS)&quot;)
+p1 = p1 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+print(p1)
+}</code></pre>
 <div class="scianimator">
 <div id="anim" style="display: inline-block;">
 
@@ -288,20 +352,38 @@ Figure 2: A series of boxplots showing the center and spread of the dataset by m
 Figure 3: Ganges monthly mean flows with <em>i</em>+12 observations highlighted.
 </p>
 <p></b></p>
-<img src="body_files/figure-html/fig3a-1.png" title="Total and partial correlograms." alt="Total and partial correlograms." width="960" /><b>
+<pre class="r"><code>q1 = ggacf(dfg$Flow) + xlab(&quot; &quot;) + theme(plot.margin=unit(c(2,2,2,2),&quot;mm&quot;))
+q2 = ggpacf(dfg$Flow) + theme(plot.margin=unit(c(2,2,2,2),&quot;mm&quot;))
+
+grid.arrange(q1, q2, nrow = 2)</code></pre>
+<img src="body_files/figure-html/unnamed-chunk-1-1.png" title="Total and partial correlograms for the monthly series." alt="Total and partial correlograms for the monthly series." style="display: block; margin: auto;" /><b>
 <p class="caption" align="center">
-Figure 4: Total and partial correlograms.
+Figure 4: Total and partial correlograms for the monthly series.
 </p>
 <p></b></p>
 </div>
 <div id="differencing" class="section level3">
 <h3>Differencing</h3>
-<img src="body_files/figure-html/unnamed-chunk-1-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /><b>
+<p>After differencing the series at lag 12, the mean appears stable. The partial</p>
+<pre class="r"><code>tsd = diff(dfg$Flow, 12)
+tsd = data.frame(value = tsd, idx = dfg$idx[-1:-12])
+p1 = ggplot(tsd, aes(y=value, x=idx)) + geom_line() + theme_bw() 
+p1 = p1 + ggtitle(&quot;Differenced (d=12) Monthly Mean Flows for Ganges [ 1946 - 2012 ]&quot;)
+p1 = p1 + xlab(&quot;Index&quot;) + ylab(&quot;Flow (CFS)&quot;)
+p1 = p1 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+)
+p1</code></pre>
+<img src="body_files/figure-html/unnamed-chunk-2-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" style="display: block; margin: auto;" /><b>
 <p class="caption" align="center">
 Figure 5: Differenced (d=12) Monthly Mean Flow Series
 </p>
 <p></b></p>
-<img src="body_files/figure-html/unnamed-chunk-2-1.png" title="Total and partial correlograms for the differenced (d=12) series." alt="Total and partial correlograms for the differenced (d=12) series." width="960" /><b>
+<pre class="r"><code>q1 = ggacf(tsd$value) + xlab(&quot; &quot;) + theme(plot.margin=unit(c(2,2,2,2),&quot;mm&quot;))
+q2 = ggpacf(tsd$value) + theme(plot.margin=unit(c(2,2,2,2),&quot;mm&quot;))
+grid.arrange(q1, q2, nrow = 2)</code></pre>
+<img src="body_files/figure-html/unnamed-chunk-3-1.png" title="Total and partial correlograms for the differenced (d=12) series." alt="Total and partial correlograms for the differenced (d=12) series." style="display: block; margin: auto;" /><b>
 <p class="caption" align="center">
 Figure 6: Total and partial correlograms for the differenced (d=12) series.
 </p>
@@ -309,32 +391,49 @@ Figure 6: Total and partial correlograms for the differenced (d=12) series.
 </div>
 <div id="arima" class="section level3">
 <h3>ARIMA</h3>
-<pre class="r"><code>AIC =  matrix(ncol = 5, nrow = 5)
-colnames(AIC) = paste(&#39;&#39;, 0:4, sep=&#39;&#39;)
-rownames(AIC) = paste(&#39;&#39;, 0:4, sep=&#39;&#39;)
+<p>Here we con</p>
+<pre class="r"><code>AIC =  matrix(ncol = 14, nrow = 14)
+colnames(AIC) = paste(&#39;&#39;, 0:13, sep=&#39;&#39;)
+rownames(AIC) = paste(&#39;&#39;, 0:13, sep=&#39;&#39;)
 
-for(p in 0:4){
-  for(q in 0:4){
+load(&quot;gAIC&quot;)
+
+for(p in 0:13){
+  for(q in 0:13){
     tryCatch({
-      a &lt;- arima(tsd$value, order=c(p, 0, q))
-      if(exists(&quot;a&quot;)) AIC[q + 1, p + 1] &lt;- floor(a$aic)
+      # a &lt;- arima(tsd$value, order=c(p, 0, q))
+      # if(exists(&quot;a&quot;)) AIC[q + 1, p + 1] &lt;- floor(a$aic)
+      
     }, error = function(cond){})
   }
 }
 
+pq = which(AIC == min(AIC), arr.ind=TRUE)
+qbest = pq[,1]-1;
+pbest = pq[,2]-1;
+
 levelplot(t(AIC), panel=function(...) {
   arg &lt;- list(...)
   panel.levelplot(...)
-  panel.text(arg$x, arg$y, round(arg$z,1))},
+  panel.text(arg$x, arg$y, round(arg$z,1))
+  panel.rect(xleft=pbest+0.5, xright=pbest+1.5, ytop=qbest+1.5, ybottom=qbest+0.5, lwd=4, border=&quot;red&quot;)
+  },
   col.regions=colorRampPalette(brewer.pal(9,&quot;Greys&quot;)[3:7])(25),
   xlab = &quot;p&quot;,
   ylab = list(&quot;q&quot;, rot=0),
   main = &quot;AIC&quot;)</code></pre>
-<p><img src="body_files/figure-html/unnamed-chunk-3-1.png" title="" alt="" width="672" /></p>
-<pre class="r"><code>print(1:10)</code></pre>
-<pre><code>##  [1]  1  2  3  4  5  6  7  8  9 10</code></pre>
-<p><img src="body_files/figure-html/unnamed-chunk-4-1.png" title="Differenced (d=12) Monthly Mean Flow Series" alt="Differenced (d=12) Monthly Mean Flow Series" width="960" /></p>
+<p><img src="body_files/figure-html/unnamed-chunk-4-1.png" /></p>
+<pre class="r"><code>tsd.fit = arima(tsd$value, order=c(pbest, 0, qbest))
+
+q1 = ggacf.th(tsd$value, fit = tsd.fit) + xlab(&quot; &quot;) + theme(plot.margin=unit(c(2,2,2,2),&quot;mm&quot;))
+q2 = ggpacf.th(tsd$value, fit = tsd.fit) + theme(plot.margin=unit(c(2,2,2,2),&quot;mm&quot;))
+
+grid.arrange(q1, q2, nrow = 2)</code></pre>
+<p><img src="body_files/figure-html/unnamed-chunk-5-1.png" alt="Differenced (d=12) Monthly Mean Flow Series" /></p>
 </div>
+</div>
+<div id="arima-1" class="section level2">
+<h2>ARIMA</h2>
 </div>
 </div>
 

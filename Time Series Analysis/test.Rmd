@@ -1,0 +1,302 @@
+---
+title: "Time Series Analysis"
+author: "Kevin Smith | Big Data Analytics | October 27th, 2014"
+output:
+  html_document:
+    self_contained: no
+    theme: spacelab
+  pdf_document:
+    fig_caption: yes
+published: no
+status: process
+layout: post
+---
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/jquery-ui.min.js"></script>
+
+<script type="text/javascript" src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.fancybox-1.3.4.pack.min.js"></script>
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/js/jquery.tocify.js"></script>
+
+<link type="text/css" rel="stylesheet" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.tocify.css" />
+<link rel="stylesheet" type="text/css" media="screen" href="https://cdn.rawgit.com/Kevin-M-Smith/BDA/master/Time%20Series%20Analysis/css/jquery.fancybox-1.3.4.css" />
+
+<script src="https://cdn.rawgit.com/Kevin-M-Smith/scianimator/master/assets/js/jquery.scianimator.min.js"></script>
+
+<head>
+<div id="TOC" class="TOC"></div>
+
+<style type="text/css">
+  a.fancybox img {
+    border: none;
+    -o-transform: scale(1,1); -ms-transform: scale(1,1); -moz-transform: scale(1,1); -webkit-transform: scale(1,1); transform: scale(1,1); -o-transition: all 0.2s ease-in-out; -ms-transition: all 0.2s ease-in-out; -moz-transition: all 0.2s ease-in-out; -webkit-transition: all 0.2s ease-in-out; transition: all 0.2s ease-in-out;
+  } 
+a.fancybox:hover img {
+  position: relative; z-index: 999; -o-transform: scale(1.03,1.03); -ms-transform: scale(1.03,1.03); -moz-transform: scale(1.03,1.03); -webkit-transform: scale(1.03,1.03); transform: scale(1.03,1.03);
+}
+
+#TOC {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 250px;
+  overflow:auto;
+}
+
+#source{
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 250px;
+  overflow:auto;
+}
+
+body {
+  float: left; 
+  margin: auto;
+  margin-left:300px;
+  line-height: 20px;
+}
+
+p { line-height: 1.5; }
+
+.fancybox-title-inside {
+  margin-left: 0px !important;
+}
+
+
+</style>
+</head>
+
+
+<body>
+  <script type="text/javascript">
+  function toggle_R() {
+  var x = document.getElementsByClassName('r');
+  if (x.length == 0) return;
+  function toggle_vis(o) {
+    var d = o.style.display;
+    o.style.display = (d == 'block' || d == '') ? 'none':'block';
+  }
+
+  for (i = 0; i < x.length; i++) {
+    var y = x[i];
+    if (y.tagName.toLowerCase() === 'pre') toggle_vis(y);
+  }
+}
+  
+  
+  $(function($){
+    $("pre").slideToggle("slow");
+    $("#TOC").tocify();
+    var addToAll = true;
+    var gallery = false;
+    var titlePosition = 'inside';
+    $(addToAll ? 'img' : 'img.fancybox').each(function(){
+      var $this = $(this);
+      var title = $this.attr('title');
+      var src = $this.attr('data-big') || $this.attr('src');
+      var a = $('<a href="#" class="fancybox"></a>').attr('href', src).attr('title', title);
+      $this.wrap(a);
+    });
+    if (gallery)
+      $('a.fancybox').attr('rel', 'fancyboxgallery');
+    $('a.fancybox').fancybox({
+      titlePosition: titlePosition
+    });
+  });
+  
+$.noConflict();
+
+  
+</script>
+</body>
+
+<div id="source" class="tocify"> 
+<ul class="tocify-header nav nav-list">
+<li class="tocify-item active" style="cursor: pointer;">
+<a onclick='$("pre").slideToggle("slow");' >Show / Hide Source</a>
+</li></ul>
+</div>
+
+
+
+```{r import, include=FALSE}
+#setwd(system("pwd", intern = TRUE))
+source("src/libs.R")        # IMPORT LIBRARIES
+source("src/ganges.R")      # IMPORT GANGES DATA
+source("src/gacf.R")        # IMPORT ACF FUNCTIONS
+source("src/table.R")
+
+
+ani.options(nmax = 25)
+#options(svgLatexPackages = "\\usepackage{standalone}")
+opts_knit$set(animation.fun = hook_scianimator,
+              fig.width = 10,
+              warning = FALSE,
+              cache = TRUE,
+              dev = 'png',
+              bootstrap.thumbnail = FALSE)
+
+knit_hooks$set(htmlcap = function(before, options, envir) {
+  if(!before) {
+    paste('<b><p class="caption" align="center">',"Figure ", options$htmlcap, ": ",options$fig.cap,"</p></b>",sep="")
+   }
+  })
+
+panderOptions("table.alignment.default", "center")
+panderOptions("table.alignment.rownames", "center")
+
+```
+
+<hr>
+
+# Overview 
+This project explores basic time series analysis techniques for two datasets. The first dataset is a complete record of the mean monthly flows of the Ganges from January 1934 to December 2013. The second dataset is a complete record of the mean monthly flows of the Nile (collected at Aswan Dam) from January 1871 to December 1984. 
+<hr>
+# The Ganges
+## Monthly Flow
+
+### Time Series
+A plot of the monthly time series reveals seasonality in the data. This structure will need to be removed before we can assess the stationarity of the time series. 
+```{r fig1, dev='png', fig.cap="79 years of mean monthly flow data for the Ganges in real space (top) and log space (bottom).", fig.width=10, fig.align='center', htmlcap=1, warning=FALSE, cache=FALSE}
+p1 = ggplot(dfg, aes(y=Flow, x=idx)) + geom_line() + theme_bw() 
+p1 = p1 + ggtitle("Monthly Mean Flows for Ganges [ 1934 - 2012 ]")
+p1 = p1 + xlab("") + ylab("Flow (CFS)")
+p1 = p1 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+
+
+p11 = ggplot(dfg, aes(y=log(Flow), x=idx)) + geom_line() + theme_bw()
+p11 = p11 + xlab("Index") + ylab("Log Flow")
+p11 = p11 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+
+#p11 = p11 + geom_smooth(method = "loess", size = 1.5)
+p11 = p11 + theme(plot.margin=unit(c(0,4,10,7),"mm"))
+
+grid.arrange(p1, p11, nrow=2)
+
+```
+<br>
+
+### Boxplots 
+Within-year seasonality is highlighted in this boxplot of monthly mean flows. During the year there seems to be 'wet' and 'dry' seasons of differing lengths. These seasons will be independently analyzed in sections 3 and 4. 
+```{r fig2, dev='png', fig.cap="A series of boxplots showing the center and spread of the dataset by month. The signal appears highly seasonal.", fig.width=10, fig.align='center', htmlcap=2, cache=TRUE}
+p2 = ggplot(dfg, aes(y=Flow, x=MID)) + geom_boxplot() + theme_bw()
+
+p2 = p2 + ggtitle(paste("Boxplot of Monthly Mean Flows for Ganges [",
+                   min(dfg$Year), 
+                   "-",
+                   max(dfg$Year),
+                   "]"))
+
+p2 = p2 + xlab("Month") + ylab("Flow (CFS)")
+p2 = p2 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+
+p2
+
+```
+<br>
+
+### Sample Statistics
+```{r tab1, results='asis', fig.height=6, cache=TRUE}
+pander(tab1, style = 'rmarkdown', justify='center')
+```
+
+<br>
+
+### Stationarity Assessment
+The monthly time series is not even first-order stationary becuase the mean exhibits strong seasonality. However, the highly seasonal structure suggests that we may be able to make the time series stationary though differencing.
+
+```{r anim, dev='png', fig.width=10, fig.show='animate', warning=FALSE, cache=TRUE, interval=0.1, cache=FALSE, htmlcap=3, fig.cap="Ganges monthly mean flows with _i_+12 observations highlighted."}
+for(i in 1:12){
+dfg.lag12 = rep(NA, length(dfg$Flow))
+dfg.lag12[1:12==(i)] = dfg$Flow[1:12==(i)]
+p1 = ggplot(dfg, aes(y=Flow, x=idx)) + geom_line() + theme_bw() + geom_point(aes(y=dfg.lag12))
+p1 = p1 + ggtitle("Monthly Mean Flows for Ganges [ 1934 - 2012 ]")
+p1 = p1 + xlab("Index") + ylab("Flow (CFS)")
+p1 = p1 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+                )
+print(p1)
+}
+```
+
+```{r fig3a, dev='png', fig.height=4, fig.width=10, warning=FALSE, htmlcap=4, fig.cap="Total and partial correlograms.", cache=TRUE}
+q1 = ggacf(dfg$Flow) + xlab(" ") + theme(plot.margin=unit(c(2,2,2,2),"mm"))
+q2 = ggpacf(dfg$Flow) + theme(plot.margin=unit(c(2,2,2,2),"mm"))
+
+grid.arrange(q1, q2, nrow = 2)
+```
+
+### Differencing
+```{r, dev='png', fig.height=4, fig.width=10, fig.cap="Differenced (d=12) Monthly Mean Flow Series", htmlcap=5, cache=TRUE, eval=TRUE}
+tsd = diff(dfg$Flow, 12)
+tsd = data.frame(value = tsd, idx = dfg$idx[-1:-12])
+p1 = ggplot(tsd, aes(y=value, x=idx)) + geom_line() + theme_bw() 
+p1 = p1 + ggtitle("Differenced (d=12) Monthly Mean Flows for Ganges [ 1946 - 2012 ]")
+p1 = p1 + xlab("Index") + ylab("Flow (CFS)")
+p1 = p1 + theme(axis.title.y = element_text(vjust=1.5),
+                axis.title.x = element_text(vjust=-0.5),
+                plot.title = element_text(vjust=1.5)
+)
+p1
+```
+
+```{r, fig.cap = "Total and partial correlograms for the differenced (d=12) series.", htmlcap=6, fig.height=4, fig.width=10}
+q1 = ggacf(tsd$value) + xlab(" ") + theme(plot.margin=unit(c(2,2,2,2),"mm"))
+q2 = ggpacf(tsd$value) + theme(plot.margin=unit(c(2,2,2,2),"mm"))
+grid.arrange(q1, q2, nrow = 2)
+```
+
+### ARIMA
+
+```{r}
+
+AIC =  matrix(ncol = 5, nrow = 5)
+colnames(AIC) = paste('', 0:4, sep='')
+rownames(AIC) = paste('', 0:4, sep='')
+
+for(p in 0:4){
+  for(q in 0:4){
+    tryCatch({
+      a <- arima(tsd$value, order=c(p, 0, q))
+      if(exists("a")) AIC[q + 1, p + 1] <- floor(a$aic)
+    }, error = function(cond){})
+  }
+}
+
+levelplot(t(AIC), panel=function(...) {
+  arg <- list(...)
+  panel.levelplot(...)
+  panel.text(arg$x, arg$y, round(arg$z,1))},
+  col.regions=colorRampPalette(brewer.pal(9,"Greys")[3:7])(25),
+  xlab = "p",
+  ylab = list("q", rot=0),
+  main = "AIC")
+
+print(1:10)
+
+```
+
+
+```{r, warning=FALSE, fig.height=4, fig.width=10, fig.cap="Differenced (d=12) Monthly Mean Flow Series", cache=TRUE, eval=TRUE}
+tsd.fit = auto.arima(tsd$value, stepwise=FALSE)
+
+q1 = ggacf.th(tsd$value, fit = tsd.fit) + xlab(" ") + theme(plot.margin=unit(c(2,2,2,2),"mm"))
+q2 = ggpacf.th(tsd$value, fit = tsd.fit) + theme(plot.margin=unit(c(2,2,2,2),"mm"))
+
+grid.arrange(q1, q2, nrow = 2)
+
+```
+
+## ARIMA

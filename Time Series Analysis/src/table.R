@@ -7,6 +7,14 @@ means = function(){
   unlist(ms)
 }
 
+logmeans = function(){
+  ms = list()
+  for(i in 1:12){
+    ms[i] = mean(log(dfg$Flow[which(dfg$MID==i)]))
+  }  
+  unlist(ms)
+}
+
 stdvs = function(){
   ss = list()
   for(i in 1:12){
